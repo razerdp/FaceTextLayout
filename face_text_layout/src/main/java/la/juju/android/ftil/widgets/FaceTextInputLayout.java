@@ -70,6 +70,7 @@ public class FaceTextInputLayout extends RelativeLayout {
   private void updateUI() {
     // TODO: 生成页面在主线程，需要放到非 UI线程
     mAllPageList = mFaceTextInputLayoutHelper.generateAllPage();
+    mFaceTextInputLayoutHelper.registerDragCallBack(mAllPageList);
     mMyPagerAdapter.setFaceTextInputPageList(mAllPageList);
     mViewPager.setOffscreenPageLimit(mMyPagerAdapter.getCount());
     mViewPager.setAdapter(mMyPagerAdapter);

@@ -1,12 +1,15 @@
 package la.juju.android.ftil.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import java.util.Collections;
 import java.util.List;
 import la.juju.android.ftil.R;
 import la.juju.android.ftil.entities.FaceText;
@@ -16,7 +19,7 @@ import la.juju.android.ftil.listeners.OnFaceTextClickListener;
  * Created by HelloVass on 16/1/1.
  */
 public class FaceTextInputLineAdapter
-    extends RecyclerView.Adapter<FaceTextInputLineAdapter.FaceTextViewHolder> {
+    extends RecyclerView.Adapter<FaceTextInputLineAdapter.FaceTextViewHolder> implements ItemDragAdapter {
 
   private List<List<FaceText>> mPageFaceTextList;
 
@@ -25,6 +28,8 @@ public class FaceTextInputLineAdapter
   private LayoutInflater mInflater;
 
   private OnFaceTextClickListener mOnFaceTextClickListener;
+
+  private ItemTouchHelper mHelper;
 
   public FaceTextInputLineAdapter(Context context) {
     mContext = context;
@@ -36,9 +41,12 @@ public class FaceTextInputLineAdapter
         .inflate(R.layout.listitem_face_text_input, parent, false));
   }
 
-  @Override public void onBindViewHolder(FaceTextViewHolder holder, int position) {
+  private int curListPos=0;
+  @Override public void onBindViewHolder(final FaceTextViewHolder holder, int position) {
 
     List<FaceText> lineFaceTextList = mPageFaceTextList.get(position);
+    curListPos=position;
+
 
     for (int i = 0; i < lineFaceTextList.size(); i++) {
       final FaceText faceText = lineFaceTextList.get(i);
@@ -52,6 +60,15 @@ public class FaceTextInputLineAdapter
             mOnFaceTextClickListener.onFaceTextClick(faceText);
           }
         }
+      });
+      faceTextView.setOnLongClickListener(new View.OnLongClickListener() {
+          @Override
+          public boolean onLongClick(View v) {
+              if (mHelper!=null){
+                  mHelper.startDrag(holder);
+              }
+              return false;
+          }
       });
     }
   }
@@ -74,13 +91,49 @@ public class FaceTextInputLineAdapter
     mPageFaceTextList = pageFaceTextList;
   }
 
-  public static class FaceTextViewHolder extends RecyclerView.ViewHolder {
+    //=============================================================拖拽相关
+    @Override
+    public int getCurListPosition() {
+        return curListPos;
+    }
+
+    @Override
+    public void setItemTouchHelper(ItemTouchHelper helper) {
+        this.mHelper=helper;
+    }
+
+    @Override
+    public void onItemMove(int curListPosition, int fromPosition, int toPosition) {
+        if (mPageFaceTextList==null||mPageFaceTextList.size()==0)return;
+        Collections.swap(mPageFaceTextList.get(curListPosition),fromPosition,toPosition);
+        notifyItemMoved(fromPosition,toPosition);
+    }
+
+    @Override
+    public boolean onItemDismiss(int position) {
+
+        return false;
+    }
+
+
+
+    public static class FaceTextViewHolder extends RecyclerView.ViewHolder implements ItemDragViewHolder {
 
     public LinearLayout mLineContainer;
 
     public FaceTextViewHolder(View itemView) {
       super(itemView);
       mLineContainer = (LinearLayout) itemView.findViewById(R.id.ll_line_container);
+    }
+
+    @Override
+    public void onItemSelected() {
+        mLineContainer.setBackgroundColor(Color.BLACK);
+    }
+
+    @Override
+    public void onItemRelease() {
+        mLineContainer.setBackgroundColor(0);
     }
   }
 

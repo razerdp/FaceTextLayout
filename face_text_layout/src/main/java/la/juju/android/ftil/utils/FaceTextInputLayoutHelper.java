@@ -1,8 +1,10 @@
 package la.juju.android.ftil.utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -10,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import la.juju.android.ftil.R;
 import la.juju.android.ftil.adapters.FaceTextInputLineAdapter;
+import la.juju.android.ftil.adapters.ItemDragAdapter;
+import la.juju.android.ftil.adapters.ItemDragViewHolder;
 import la.juju.android.ftil.entities.FaceText;
 import la.juju.android.ftil.listeners.OnFaceTextClickListener;
 import la.juju.android.ftil.source.FaceTextProvider;
@@ -74,6 +78,20 @@ public class FaceTextInputLayoutHelper {
     for (FaceTextInputLineAdapter adapter : mFaceTextInputLineAdapterList) {
       adapter.setOnFaceTextClickListener(null);
     }
+  }
+
+  public void registerDragCallBack(@NonNull List<RecyclerView> recyclerViewList){
+      if (recyclerViewList.size()==0)return;
+      for (RecyclerView recyclerView : recyclerViewList) {
+          if (recyclerView.getAdapter() instanceof ItemDragAdapter) {
+              ItemDragAdapter adapter=((ItemDragAdapter) recyclerView.getAdapter());
+              ItemTouchHelper.Callback callback = new ItemTouchCallBack(adapter,false);
+              ItemTouchHelper helper=new ItemTouchHelper(callback);
+              adapter.setItemTouchHelper(helper);
+              helper.attachToRecyclerView(recyclerView);
+
+          }
+      }
   }
 
   /**
